@@ -2,10 +2,31 @@
 
 Website of Jupiter Mushroom Association (목성버섯연합), served by GitHub Pages.
 
-- One static page: `index.html` + `styles.css`, no build step.
-- `images/` holds resized in-game screenshots of *The Night-Eating Wolf and the Paper Village*
-  (source: `PaperVillage/docs/itch/screenshots/*-en.png`). No images are drawn with code.
-- `CNAME` binds the custom domain `jupmush.com`.
+- Vite + React + TypeScript + Tailwind CSS v4 + shadcn/ui, styled after a Steam store game page
+  (colors and layout only; no Steam logos or trademarks).
+- Page text lives in `src/content.ts`; the English game description comes from
+  `PaperVillage/docs/itch/store-page.md`.
+- `.github/workflows/deploy.yml` builds and deploys `dist/` on every push to `main`
+  (Pages source: GitHub Actions).
+- `public/CNAME` keeps the custom domain `jupmush.com`.
+
+## Images
+
+No images are drawn with code.
+
+- `public/images/shots/`, `public/images/thumbs/`: resized in-game screenshots
+  (`PaperVillage/docs/itch/screenshots/*-en.png`).
+- `public/images/capsule.jpg`, `public/images/og.jpg`: resized from
+  `PaperVillage/docs/design/capsule/2026-10-08/capsule-concept-a-en-bottom-title.png`,
+  made with an image generation tool (record: `generation-record-en-bottom-title.json`).
+
+## Develop
+
+```bash
+npm install
+npm run dev
+npm run build
+```
 
 ## DNS (Dynadot)
 
