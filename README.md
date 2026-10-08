@@ -2,8 +2,9 @@
 
 Website of Jupiter Mushroom Association (목성버섯연합), served by GitHub Pages.
 
-- Vite + React + TypeScript + Tailwind CSS v4 + shadcn/ui, styled after a Steam store game page
-  (colors and layout only; no Steam logos or trademarks).
+- Vite + React + TypeScript + Tailwind CSS v4 + shadcn/ui, laid out like a Steam store game page
+  (layout only; no Steam logos or trademarks).
+- Colors come from the studio logo palette (`src/index.css`, `:root`).
 - Page text lives in `src/content.ts`; the English game description comes from
   `PaperVillage/docs/itch/store-page.md`.
 - `.github/workflows/deploy.yml` builds and deploys `dist/` on every push to `main`
@@ -14,6 +15,8 @@ Website of Jupiter Mushroom Association (목성버섯연합), served by GitHub P
 
 No images are drawn with code.
 
+- `public/images/logo.png`: the studio pixel-art logo (48×64), provided by the user. Shown only at
+  integer scales with `image-rendering: pixelated`; also the favicon.
 - `public/images/shots/`, `public/images/thumbs/`: resized in-game screenshots
   (`PaperVillage/docs/itch/screenshots/*-en.png`).
 - `public/images/capsule.jpg`, `public/images/og.jpg`: resized from

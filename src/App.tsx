@@ -18,10 +18,16 @@ function SectionTitle({ children }: { children: ReactNode }) {
 
 function SiteHeader() {
   return (
-    <header className="sticky top-0 z-20 bg-header">
-      <div className="mx-auto flex max-w-[1000px] flex-wrap items-center justify-between gap-x-6 gap-y-1 px-4 py-3">
-        <a href="#top" className="text-base font-semibold tracking-wide text-heading uppercase">
-          Jupiter Mushroom <span className="text-accent">Association</span>
+    <header className="sticky top-0 z-20 border-b border-border bg-header">
+      <div className="mx-auto flex max-w-[1000px] items-center justify-between gap-x-6 px-4 py-2">
+        <a href="#top" className="shrink-0">
+          <img
+            src="/images/logo.png"
+            alt={studio.name}
+            width={48}
+            height={64}
+            className="pixelated h-16 w-12"
+          />
         </a>
         <nav aria-label="Main" className="flex gap-5 text-sm font-medium tracking-wide uppercase">
           <a href="#games" className="hover:text-heading">Games</a>
@@ -50,7 +56,7 @@ function GameHero() {
       </p>
       <h1 className="mt-1 mb-3 text-2xl font-normal text-heading sm:text-[26px]">{game.title}</h1>
 
-      <div className="grid gap-4 bg-black/20 p-0 lg:grid-cols-[minmax(0,1fr)_324px] lg:p-3">
+      <div className="grid gap-4 bg-panel p-0 lg:grid-cols-[minmax(0,1fr)_324px] lg:p-3">
         <MediaGallery shots={game.screenshots} />
 
         <aside className="flex flex-col gap-3 px-3 pb-3 lg:px-0 lg:pb-0">
@@ -86,10 +92,10 @@ function GameHero() {
 
 function ComingSoonBox() {
   return (
-    <div className="relative mt-6 bg-gradient-to-r from-[#3d5a73] to-[#2a3f52] px-5 py-4">
+    <div className="relative mt-6 bg-gradient-to-r from-teal/50 to-panel px-5 py-4">
       <h2 className="text-lg text-heading">{game.title} is coming soon</h2>
-      <p className="mt-1 text-sm text-muted-foreground">The game will be released on itch.io first.</p>
-      <div className="mt-3 flex items-center gap-1 bg-black/40 p-1 sm:absolute sm:right-4 sm:-bottom-4 sm:mt-0 sm:w-auto">
+      <p className="mt-1 text-sm text-foreground">The game will be released on itch.io first.</p>
+      <div className="mt-3 flex items-center gap-1 bg-background/70 p-1 sm:absolute sm:right-4 sm:-bottom-4 sm:mt-0 sm:w-auto">
         <span className="px-3 text-sm text-heading">Coming soon to itch.io</span>
         <Button disabled className="rounded-sm bg-primary px-4 text-primary-foreground disabled:opacity-80">
           Not yet available
@@ -114,10 +120,10 @@ function AboutGame() {
               <strong className="text-heading">{p.title}</strong> {p.body}
             </p>
           ))}
-          <h3 className="mt-2 text-sm tracking-widest text-accent uppercase">Features</h3>
+          <h3 className="mt-2 text-sm tracking-widest text-highlight uppercase">Features</h3>
           <ul className="flex flex-col gap-3">
             {game.features.map((f) => (
-              <li key={f.title} className="border-l-2 border-accent/60 pl-3">
+              <li key={f.title} className="border-l-2 border-highlight/70 pl-3">
                 <strong className="block text-heading">{f.title}</strong>
                 {f.body}
               </li>
@@ -127,7 +133,7 @@ function AboutGame() {
       </article>
 
       <aside className="flex flex-col gap-4">
-        <Card className="gap-3 rounded-sm bg-black/20 py-4 ring-0">
+        <Card className="gap-3 rounded-sm bg-panel py-4 ring-0">
           <CardContent className="px-4">
             <h3 className="mb-2 text-xs tracking-widest text-heading uppercase">Languages</h3>
             <table className="w-full text-xs">
@@ -151,7 +157,7 @@ function AboutGame() {
           </CardContent>
         </Card>
 
-        <Card className="gap-3 rounded-sm bg-black/20 py-4 ring-0">
+        <Card className="gap-3 rounded-sm bg-panel py-4 ring-0">
           <CardContent className="px-4">
             <h3 className="mb-2 text-xs tracking-widest text-heading uppercase">Controls</h3>
             <ul className="flex flex-col gap-1.5 text-xs">
@@ -171,7 +177,16 @@ function Studio() {
     <div className="mt-14 grid gap-8 md:grid-cols-2">
       <section id="about" className="scroll-mt-16">
         <SectionTitle>About the studio</SectionTitle>
-        <p className="text-sm leading-relaxed">{studio.about}</p>
+        <div className="flex items-start gap-5">
+          <img
+            src="/images/logo.png"
+            alt=""
+            width={48}
+            height={64}
+            className="pixelated h-48 w-36 shrink-0 max-sm:h-32 max-sm:w-24"
+          />
+          <p className="text-sm leading-relaxed">{studio.about}</p>
+        </div>
       </section>
       <section id="contact" className="scroll-mt-16">
         <SectionTitle>Contact</SectionTitle>
@@ -197,7 +212,7 @@ export default function App() {
         <AboutGame />
         <Studio />
       </main>
-      <footer className="bg-header">
+      <footer className="border-t border-border bg-header">
         <div className="mx-auto max-w-[1000px] px-4 py-6 text-xs text-muted-foreground">
           <Separator className="mb-4 bg-secondary" />
           <p className="text-heading">{studio.name}</p>

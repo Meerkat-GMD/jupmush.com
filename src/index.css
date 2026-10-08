@@ -42,6 +42,10 @@
     --color-tag: var(--tag);
     --color-tag-foreground: var(--tag-foreground);
     --color-heading: var(--heading);
+    --color-panel: var(--panel);
+    --color-highlight: var(--highlight);
+    --color-peach: var(--peach);
+    --color-teal: var(--teal);
     --radius-sm: calc(var(--radius) * 0.6);
     --radius-md: calc(var(--radius) * 0.8);
     --radius-lg: var(--radius);
@@ -52,44 +56,56 @@
 }
 
 :root {
-    /* Steam-store-like dark palette; the site is dark only */
+    /* Palette from the studio logo (public/images/logo.png); the site is dark only.
+       Mixed tones are blends of logo colors, no new hues. */
     color-scheme: dark;
-    --background: #1b2838;
-    --foreground: #c6d4df;
-    --card: #16202d;
-    --card-foreground: #c6d4df;
-    --popover: #16202d;
-    --popover-foreground: #c6d4df;
-    --primary: #5c8a1a;
-    --primary-foreground: #e4f5c9;
-    --secondary: #2a475e;
-    --secondary-foreground: #c6d4df;
-    --muted: #213245;
-    --muted-foreground: #8f98a0;
-    --accent: #66c0f4;
-    --accent-foreground: #0e1620;
-    --destructive: oklch(0.704 0.191 22.216);
-    --border: #2f4458;
-    --input: #2f4458;
-    --ring: #66c0f4;
-    --chart-1: #66c0f4;
-    --chart-2: #5c8a1a;
-    --chart-3: #2a475e;
-    --chart-4: #8f98a0;
-    --chart-5: #c6d4df;
+    --navy: #001033;
+    --coral: #fa8f61;
+    --coral-deep: #f4683c;
+    --peach: #ffd8c7;
+    --ice: #ccfcff;
+    --cyan: #65dee7;
+    --cyan-soft: #83e5ec;
+    --teal: #189ca5;
+
+    --background: var(--navy);
+    --foreground: var(--ice);
+    --card: color-mix(in srgb, var(--navy) 88%, var(--teal));
+    --card-foreground: var(--ice);
+    --popover: color-mix(in srgb, var(--navy) 88%, var(--teal));
+    --popover-foreground: var(--ice);
+    --primary: var(--coral);
+    --primary-foreground: var(--navy);
+    --secondary: color-mix(in srgb, var(--navy) 70%, var(--teal));
+    --secondary-foreground: var(--ice);
+    --muted: color-mix(in srgb, var(--navy) 80%, var(--teal));
+    --muted-foreground: color-mix(in srgb, var(--cyan-soft) 72%, var(--navy));
+    --accent: var(--cyan);
+    --accent-foreground: var(--navy);
+    --destructive: var(--coral-deep);
+    --border: color-mix(in srgb, var(--navy) 65%, var(--teal));
+    --input: color-mix(in srgb, var(--navy) 65%, var(--teal));
+    --ring: var(--cyan);
+    --chart-1: var(--cyan);
+    --chart-2: var(--coral);
+    --chart-3: var(--teal);
+    --chart-4: var(--peach);
+    --chart-5: var(--ice);
     --radius: 0.25rem;
-    --sidebar: #171a21;
-    --sidebar-foreground: #c6d4df;
-    --sidebar-primary: #66c0f4;
-    --sidebar-primary-foreground: #0e1620;
-    --sidebar-accent: #2a475e;
-    --sidebar-accent-foreground: #c6d4df;
-    --sidebar-border: #2f4458;
-    --sidebar-ring: #66c0f4;
-    --header: #171a21;
-    --tag: rgba(103, 193, 245, 0.18);
-    --tag-foreground: #67c1f5;
+    --sidebar: var(--navy);
+    --sidebar-foreground: var(--ice);
+    --sidebar-primary: var(--cyan);
+    --sidebar-primary-foreground: var(--navy);
+    --sidebar-accent: color-mix(in srgb, var(--navy) 70%, var(--teal));
+    --sidebar-accent-foreground: var(--ice);
+    --sidebar-border: color-mix(in srgb, var(--navy) 65%, var(--teal));
+    --sidebar-ring: var(--cyan);
+    --header: var(--navy);
+    --panel: color-mix(in srgb, var(--navy) 88%, var(--teal));
+    --tag: color-mix(in srgb, var(--teal) 45%, var(--navy));
+    --tag-foreground: var(--ice);
     --heading: #ffffff;
+    --highlight: var(--coral);
 }
 
 
@@ -106,4 +122,8 @@
   html {
     @apply font-sans;
     }
+}
+
+.pixelated {
+  image-rendering: pixelated;
 }
