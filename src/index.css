@@ -2,11 +2,14 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 @import "@fontsource-variable/geist";
+@import "pretendard/dist/web/variable/pretendardvariable-dynamic-subset.css";
+@import "@fontsource/gaegu/700.css";
 
 
 @theme inline {
     --font-heading: var(--font-sans);
-    --font-sans: 'Geist Variable', sans-serif;
+    --font-sans: 'Geist Variable', 'Pretendard Variable', sans-serif;
+    --font-display: 'Gaegu', 'Pretendard Variable', sans-serif;
     --color-sidebar-ring: var(--sidebar-ring);
     --color-sidebar-border: var(--sidebar-border);
     --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -39,13 +42,8 @@
     --color-foreground: var(--foreground);
     --color-background: var(--background);
     --color-header: var(--header);
-    --color-tag: var(--tag);
-    --color-tag-foreground: var(--tag-foreground);
     --color-heading: var(--heading);
-    --color-panel: var(--panel);
     --color-highlight: var(--highlight);
-    --color-peach: var(--peach);
-    --color-teal: var(--teal);
     --radius-sm: calc(var(--radius) * 0.6);
     --radius-md: calc(var(--radius) * 0.8);
     --radius-lg: var(--radius);
@@ -56,9 +54,9 @@
 }
 
 :root {
-    /* Palette from the studio logo (public/images/logo.png); the site is dark only.
-       Mixed tones are blends of logo colors, no new hues. */
-    color-scheme: dark;
+    /* Palette from the studio logo (public/images/logo.png). The studio pages are light;
+       mixed tones are blends of logo colors, no new hues. */
+    color-scheme: light;
     --navy: #001033;
     --coral: #fa8f61;
     --coral-deep: #f4683c;
@@ -68,6 +66,33 @@
     --cyan-soft: #83e5ec;
     --teal: #189ca5;
 
+    --background: color-mix(in srgb, var(--peach) 14%, white);
+    --foreground: var(--navy);
+    --card: white;
+    --card-foreground: var(--navy);
+    --popover: white;
+    --popover-foreground: var(--navy);
+    --primary: var(--navy);
+    --primary-foreground: white;
+    --secondary: color-mix(in srgb, var(--peach) 45%, white);
+    --secondary-foreground: var(--navy);
+    --muted: color-mix(in srgb, var(--peach) 28%, white);
+    --muted-foreground: color-mix(in srgb, var(--navy) 68%, white);
+    --accent: color-mix(in srgb, var(--teal) 75%, var(--navy));
+    --accent-foreground: white;
+    --destructive: #c2410c;
+    --border: color-mix(in srgb, var(--navy) 12%, white);
+    --input: color-mix(in srgb, var(--navy) 18%, white);
+    --ring: var(--teal);
+    --radius: 0.75rem;
+    --header: color-mix(in srgb, var(--peach) 14%, white);
+    --heading: var(--navy);
+    --highlight: var(--coral-deep);
+}
+
+/* The play data admin page keeps the earlier dark look. */
+.theme-navy {
+    color-scheme: dark;
     --background: var(--navy);
     --foreground: var(--ice);
     --card: color-mix(in srgb, var(--navy) 88%, var(--teal));
@@ -101,13 +126,30 @@
     --sidebar-border: color-mix(in srgb, var(--navy) 65%, var(--teal));
     --sidebar-ring: var(--cyan);
     --header: var(--navy);
-    --panel: color-mix(in srgb, var(--navy) 88%, var(--teal));
-    --tag: color-mix(in srgb, var(--teal) 45%, var(--navy));
-    --tag-foreground: var(--ice);
     --heading: #ffffff;
     --highlight: var(--coral);
 }
 
+/* Night of Vargold page: the game's style guide palette (PaperVillage docs/world-assets/style-guide.md). */
+.theme-vargold {
+    color-scheme: dark;
+    --ink: #2A2140;
+    --faded-ink: #5E5270;
+    --lantern-gold: #E0A23A;
+    --moonlight-cream: #F1E3BF;
+    --cut-paper-ivory: #FFFAF0;
+    --night-table: #141831;
+
+    --background: var(--night-table);
+    --foreground: var(--moonlight-cream);
+    --heading: var(--cut-paper-ivory);
+    --muted-foreground: color-mix(in srgb, var(--moonlight-cream) 72%, var(--night-table));
+    --border: color-mix(in srgb, var(--moonlight-cream) 18%, var(--night-table));
+    --ring: var(--lantern-gold);
+    --highlight: var(--lantern-gold);
+    background-color: var(--background);
+    color: var(--foreground);
+}
 
 @layer base {
   * {
@@ -122,8 +164,37 @@
   html {
     @apply font-sans;
     }
+  /* Korean wraps between words, not inside them. */
+  html:lang(ko) {
+    word-break: keep-all;
+    }
 }
 
 .pixelated {
   image-rendering: pixelated;
+}
+
+/* Paper art from the game (PaperVillage Resources/UI/Battle/PaperArt), drawn as nine-slice
+   border images like the game's USS does. Slices count pixels of the files in public/. */
+.paper-sheet {
+  border-style: solid;
+  border-width: 36px;
+  border-image: url("/images/games/night-of-vargold/paper.webp") 120 fill / 36px stretch;
+}
+
+.paper-button {
+  border-style: solid;
+  border-width: 15px 14px 16px;
+  border-image: url("/images/games/night-of-vargold/button-gold.webp") 120 116 123 fill / 15px 14px 16px stretch;
+  color: var(--ink);
+  transition: translate 150ms ease-out, filter 150ms ease-out;
+}
+
+.paper-button:hover {
+  filter: brightness(1.06);
+  translate: 0 -1px;
+}
+
+.paper-button:active {
+  translate: 0 1px;
 }

@@ -1,52 +1,62 @@
 import type { ReactNode } from 'react'
 
-import { Separator } from '@/components/ui/separator'
-import { studio } from '@/content'
+import { siteText, studio, type Lang } from '@/content'
+import { localPath } from '@/lib/lang'
 
-// Links start with "/" so they also work from the privacy page.
+// Links start with "/" so they work from every page.
 
 export function SectionTitle({ children }: { children: ReactNode }) {
   return (
-    <h2 className="mb-3 border-b border-secondary pb-1 text-sm font-normal tracking-widest text-heading uppercase">
+    <h2 className="mb-3 border-b pb-1 text-sm font-semibold tracking-widest text-heading uppercase">
       {children}
     </h2>
   )
 }
 
-export function SiteHeader() {
+// altHref is the same page in the other language; pages without one show no language link.
+export function SiteHeader({ lang, altHref }: { lang: Lang; altHref?: string }) {
+  const s = siteText[lang]
+  const home = localPath(lang, '/')
   return (
-    <header className="sticky top-0 z-20 border-b border-border bg-header">
-      <div className="mx-auto flex max-w-[1000px] items-center justify-between gap-x-6 px-4 py-2">
-        <a href="/#top" className="shrink-0">
-          <img
-            src="/images/logo.png"
-            alt={studio.name}
-            width={48}
-            height={64}
-            className="pixelated h-16 w-12"
-          />
+    <header className="sticky top-0 z-20 border-b bg-header text-foreground">
+      <div className="mx-auto flex max-w-[1100px] items-center gap-x-6 px-4 py-2 sm:px-8">
+        <a href={home} className="flex shrink-0 items-center gap-3 font-semibold text-heading">
+          <img src="/images/logo.png" alt="" width={48} height={64} className="pixelated h-16 w-12" />
+          <span className="max-sm:sr-only">{studio[lang].name}</span>
         </a>
-        <nav aria-label="Main" className="flex gap-5 text-sm font-medium tracking-wide uppercase">
-          <a href="/#games" className="hover:text-heading">Games</a>
-          <a href="/#about" className="hover:text-heading">About</a>
-          <a href="/#contact" className="hover:text-heading">Contact</a>
+        <nav aria-label="Main" className="ml-auto flex items-center gap-5 text-sm font-medium">
+          <a href={`${home}#games`} className="hover:text-highlight">{s.games}</a>
+          <a href={`${home}#about`} className="hover:text-highlight">{s.about}</a>
+          <a href={`${home}#contact`} className="hover:text-highlight">{s.contact}</a>
+          {altHref && (
+            <a
+              href={altHref}
+              hrefLang={lang === 'ko' ? 'en' : 'ko'}
+              lang={lang === 'ko' ? 'en' : 'ko'}
+              className="rounded-full border px-3 py-1 hover:border-highlight hover:text-highlight"
+            >
+              {s.switchLabel}
+            </a>
+          )}
         </nav>
       </div>
     </header>
   )
 }
 
-export function SiteFooter() {
+export function SiteFooter({ lang }: { lang: Lang }) {
+  const t = studio[lang]
   return (
-    <footer className="border-t border-border bg-header">
-      <div className="mx-auto max-w-[1000px] px-4 py-6 text-xs text-muted-foreground">
-        <Separator className="mb-4 bg-secondary" />
-        <p className="text-heading">{studio.name}</p>
-        <p className="mt-1">{studio.tagline}</p>
-        <p className="mt-3">
-          <a href="/privacy/" className="text-accent hover:text-heading">Privacy Policy</a>
+    <footer className="border-t bg-header text-foreground">
+      <div className="mx-auto max-w-[1100px] px-4 py-8 text-sm text-muted-foreground sm:px-8">
+        <p className="font-semibold text-heading">{t.name}</p>
+        <p className="mt-1">{t.tagline}</p>
+        <p className="mt-4">
+          <a href="/privacy/" className="underline-offset-4 hover:text-heading hover:underline">
+            {siteText[lang].privacy}
+          </a>
         </p>
-        <p className="mt-3">© 2026 {studio.name}. All rights reserved.</p>
+        <p className="mt-4 text-xs">© 2026 {studio.en.name}. {siteText[lang].rights}</p>
       </div>
     </footer>
   )

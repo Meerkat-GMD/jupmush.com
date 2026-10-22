@@ -7,7 +7,7 @@ import { privacy, studio } from '@/content'
 export default function PrivacyPage() {
   return (
     <div id="top" className="min-h-svh">
-      <SiteHeader />
+      <SiteHeader lang="en" />
       <main className="mx-auto max-w-[1000px] px-4 pt-6 pb-16">
         <p className="text-xs text-muted-foreground">
           <a href="/" className="hover:text-heading">Home</a> <span aria-hidden>›</span> {privacy.title}
@@ -45,7 +45,7 @@ export default function PrivacyPage() {
           ))}
         </article>
       </main>
-      <SiteFooter />
+      <SiteFooter lang="en" />
     </div>
   )
 }
