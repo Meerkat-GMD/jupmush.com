@@ -7,6 +7,9 @@ Website of Jupiter Mushroom Association (목성버섯연합), served by GitHub P
 - Colors come from the studio logo palette (`src/index.css`, `:root`).
 - Page text lives in `src/content.ts`; the English game description comes from
   `PaperVillage/docs/itch/store-page.md`.
+- `privacy/index.html` is a second Vite entry (`vite.config.ts`), built to `dist/privacy/index.html` so
+  `https://jupmush.com/privacy/` works on Pages. It is the privacy policy for the game's play data
+  (`PaperVillage/docs/play-data.md`); the footer links to it. Update it whenever the play data changes.
 - `.github/workflows/deploy.yml` builds and deploys `dist/` on every push to `main`
   (Pages source: GitHub Actions).
 - `public/CNAME` keeps the custom domain `jupmush.com`.

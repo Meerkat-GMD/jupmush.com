@@ -11,4 +11,13 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  // privacy/index.html builds to dist/privacy/index.html, so GitHub Pages serves /privacy/.
+  build: {
+    rolldownOptions: {
+      input: {
+        main: path.resolve(__dirname, 'index.html'),
+        privacy: path.resolve(__dirname, 'privacy/index.html'),
+      },
+    },
+  },
 })
