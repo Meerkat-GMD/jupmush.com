@@ -18,6 +18,9 @@ export type Step = {
   Relic?: Choice
 }
 export type Summary = {
+  Version?: string
+  StartedUtc?: string
+  UpdatedUtc?: string
   Result?: number
   Act?: number
   Path?: Step[]
@@ -83,6 +86,26 @@ function conceptOf(summary: Summary, sim: Sim) {
   if (best === 0) return 'none'
   const leaders = scores.filter(([, score]) => score === best)
   return leaders.length === 1 ? leaders[0][0] : 'mixed'
+}
+
+/**
+ * Installs that sent rows no game sends: a row whose version is not its summary's, a run updated before it started,
+ * or two runs whose times overlap, since one install plays one run at a time.
+ */
+export function suspectInstalls(rows: Row[]) {
+  const suspect = new Set<string>()
+  const spans = new Map<string, [string, string][]>()
+  for (const r of rows) {
+    const start = r.summary.StartedUtc ?? ''
+    const end = r.summary.UpdatedUtc ?? ''
+    if (r.version !== r.summary.Version || end < start) suspect.add(r.install_id)
+    spans.set(r.install_id, [...(spans.get(r.install_id) ?? []), [start, end]])
+  }
+  for (const [install, runs] of spans) {
+    runs.sort(([a, b], [c, d]) => (a < c ? -1 : a > c ? 1 : b < d ? -1 : b > d ? 1 : 0))
+    if (runs.some(([start], i) => i > 0 && start < runs[i - 1][1])) suspect.add(install)
+  }
+  return suspect
 }
 
 function groupBy<T>(items: T[], key: (item: T) => string) {

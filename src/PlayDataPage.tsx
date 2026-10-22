@@ -2,7 +2,7 @@ import { createClient, type Session } from '@supabase/supabase-js'
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react'
 
 import { Button } from '@/components/ui/button'
-import { compareVersions, report, type Row, type Sim, type Table } from '@/playdata/stats'
+import { compareVersions, report, suspectInstalls, type Row, type Sim, type Table } from '@/playdata/stats'
 
 // The game's publishable key: it may insert runs and read nothing. Reading needs an account flagged playdata_admin
 // (PaperVillage tools/PlayData/schema.sql), so this page holds no secret.
@@ -111,6 +111,7 @@ export default function PlayDataPage() {
   const [loading, setLoading] = useState(false)
   const [version, setVersion] = useState<string | null>(null)
   const [dirty, setDirty] = useState(false)
+  const [suspect, setSuspect] = useState(false)
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => setSession(data.session))
@@ -139,7 +140,12 @@ export default function PlayDataPage() {
     if (admin) refresh()
   }, [admin, refresh])
 
-  const shown = useMemo(() => (rows ?? []).filter((r) => dirty || !r.version.endsWith('-dirty')), [rows, dirty])
+  // Judged on every row, so runs of two versions that overlap still count.
+  const suspects = useMemo(() => suspectInstalls(rows ?? []), [rows])
+  const shown = useMemo(
+    () => (rows ?? []).filter((r) => (dirty || !r.version.endsWith('-dirty')) && (suspect || !suspects.has(r.install_id))),
+    [rows, dirty, suspect, suspects],
+  )
   const releases = useMemo(() => {
     const groups = new Map<string, Map<string, number>>()
     for (const r of shown) {
@@ -211,6 +217,10 @@ export default function PlayDataPage() {
         <label className="flex items-center gap-1.5 text-xs text-muted-foreground">
           <input type="checkbox" checked={dirty} onChange={(e) => setDirty(e.target.checked)} />
           -dirty 빌드 포함
+        </label>
+        <label className="flex items-center gap-1.5 text-xs text-muted-foreground">
+          <input type="checkbox" checked={suspect} onChange={(e) => setSuspect(e.target.checked)} />
+          의심 설치 포함 · {suspects.size}
         </label>
       </div>
       {error && <p className="text-xs text-destructive">{error}</p>}
