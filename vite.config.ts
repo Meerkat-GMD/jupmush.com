@@ -12,7 +12,7 @@ export default defineConfig({
     },
   },
   // Each page is its own entry: privacy/index.html builds to dist/privacy/index.html, so GitHub Pages
-  // serves /privacy/, and likewise /ko/, /games/night-of-vargold/ and /playdata/.
+  // serves /privacy/, and likewise /ko/, /games/night-of-vargold/, /playdata/ and /balance/.
   build: {
     rolldownOptions: {
       input: {
@@ -22,6 +22,7 @@ export default defineConfig({
         koVargold: path.resolve(__dirname, 'ko/games/night-of-vargold/index.html'),
         privacy: path.resolve(__dirname, 'privacy/index.html'),
         playdata: path.resolve(__dirname, 'playdata/index.html'),
+        balance: path.resolve(__dirname, 'balance/index.html'),
       },
     },
   },

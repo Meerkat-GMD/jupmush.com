@@ -1,12 +1,10 @@
-import { createClient, type Session } from '@supabase/supabase-js'
-import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react'
+import type { Session } from '@supabase/supabase-js'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
+import { SignIn } from '@/components/SignIn'
+import { supabase } from '@/lib/supabase'
 import { compareVersions, report, suspectInstalls, type Row, type Sim, type Table } from '@/playdata/stats'
-
-// The game's publishable key: it may insert runs and read nothing. Reading needs an account flagged playdata_admin
-// (PaperVillage tools/PlayData/schema.sql), so this page holds no secret.
-const supabase = createClient('https://fctpvxgebtjmaxocbsxg.supabase.co', 'sb_publishable_oeaIdUG0RfqIajvptT1bSw_3gBPks9B')
 
 const ALL = 'all'
 
@@ -76,33 +74,6 @@ function DataTable({ table }: { table: Table }) {
   )
 }
 
-function SignIn() {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [error, setError] = useState('')
-  const [busy, setBusy] = useState(false)
-
-  async function submit(event: FormEvent) {
-    event.preventDefault()
-    setBusy(true)
-    setError('')
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
-    if (error) setError('로그인하지 못했습니다. 이메일과 비밀번호를 확인하세요.')
-    setBusy(false)
-  }
-
-  const field = 'h-10 w-full rounded-md bg-secondary px-3 text-sm text-heading outline-none focus:ring-2 focus:ring-ring'
-  return (
-    <form onSubmit={submit} className="mx-auto mt-16 flex max-w-xs flex-col gap-3">
-      <h1 className="text-lg text-heading">플레이 데이터</h1>
-      <input className={field} type="email" autoComplete="username" placeholder="이메일" value={email} onChange={(e) => setEmail(e.target.value)} required />
-      <input className={field} type="password" autoComplete="current-password" placeholder="비밀번호" value={password} onChange={(e) => setPassword(e.target.value)} required />
-      <Button type="submit" size="lg" disabled={busy}>로그인</Button>
-      {error && <p className="text-xs text-destructive">{error}</p>}
-    </form>
-  )
-}
-
 export default function PlayDataPage() {
   const [session, setSession] = useState<Session | null | undefined>(undefined)
   const [rows, setRows] = useState<Row[] | null>(null)
@@ -169,7 +140,7 @@ export default function PlayDataPage() {
 
   if (rows === null) {
     if (session === undefined) return null
-    if (!session) return <SignIn />
+    if (!session) return <SignIn title="플레이 데이터" />
     if (!admin)
       return (
         <div className="mx-auto mt-16 max-w-xs text-sm">
