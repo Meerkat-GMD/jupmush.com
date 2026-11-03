@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { SignIn } from '@/components/SignIn'
 import { supabase } from '@/lib/supabase'
+import { RunList } from '@/playdata/RunList'
 import { compareVersions, report, suspectInstalls, type Names, type Row, type Sim, type Table } from '@/playdata/stats'
 
 const ALL = 'all'
@@ -91,6 +92,7 @@ export default function PlayDataPage() {
   const [version, setVersion] = useState<string | null>(null)
   const [dirty, setDirty] = useState(false)
   const [suspect, setSuspect] = useState(false)
+  const [view, setView] = useState<'stats' | 'runs'>('stats')
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => setSession(data.session))
@@ -218,9 +220,19 @@ export default function PlayDataPage() {
         {sim ? `시뮬레이션: ${sim.label} (${sim.created_at.slice(0, 10)})` : '시뮬레이션 스냅샷이 없어 비교 열과 덱 컨셉 표를 생략합니다.'}
       </p>
 
-      {result.tables.map((t) => (
-        <DataTable key={t.title} table={t} />
-      ))}
+      <div className="flex gap-1">
+        {([['stats', '통계'], ['runs', `런 목록 · ${filtered.length}`]] as const).map(([key, label]) => (
+          <Button key={key} variant={view === key ? 'secondary' : 'ghost'} size="sm" onClick={() => setView(key)}>
+            {label}
+          </Button>
+        ))}
+      </div>
+
+      {view === 'runs' ? (
+        <RunList rows={filtered} sim={sim} names={names} />
+      ) : (
+        result.tables.map((t) => <DataTable key={t.title} table={t} />)
+      )}
     </main>
   )
 }

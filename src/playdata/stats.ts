@@ -23,9 +23,14 @@ export type Summary = {
   UpdatedUtc?: string
   Result?: number
   Act?: number
+  Battle?: number
+  Hp?: number
+  MaxHp?: number
+  Gold?: number
+  LostTo?: string[]
   Path?: Step[]
   Relics?: string[]
-  Deck?: { Card: string; Count?: number }[]
+  Deck?: { Card: string; Count?: number; Inscriptions?: string[] }[]
 }
 export type Row = { install_id: string; run_id: string; version: string; received_at?: string; summary: Summary }
 
@@ -41,7 +46,25 @@ type SimPool = {
 export type Sim = { label: string; created_at: string; data: { pools: Record<string, SimPool>; starter: Record<string, number> } }
 
 /** Korean names by id from the newest card_values row (PaperVillage's tools/CardValue), so this public code holds none. */
-export type Names = { cards: Record<string, string>; relics: Record<string, string>; enemies: Record<string, string> }
+export type Names = {
+  cards: Record<string, string>
+  relics: Record<string, string>
+  enemies: Record<string, string>
+  inscriptions?: Record<string, string>
+}
+
+/** Display names for ids, falling back to the id when a snapshot lacks one. */
+export function labeler(names: Names | null) {
+  return {
+    card: (id: string) => names?.cards[id] ?? id,
+    relic: (id: string) => names?.relics[id] ?? id,
+    enemy: (id: string) => names?.enemies[id] ?? id,
+    inscription: (id: string) => names?.inscriptions?.[id] ?? id,
+    // An encounter key names its monsters by kind: PaperLantern*2, Curtain+Shutters, solo:TinKnight.
+    encounter: (key: string) => key.replace(/[A-Z][A-Za-z]*/g, (kind) => names?.enemies[kind] ?? kind),
+    concept: (id: string) => CONCEPT_NAMES[id] ?? id,
+  }
+}
 
 export type Table = { title: string; note?: string; headers: string[]; rows: string[][] }
 export type Report = {
@@ -67,7 +90,7 @@ const f2 = (x: number) => x.toFixed(2)
 const count = <T,>(items: T[], test: (item: T) => boolean) => items.reduce((n, item) => n + (test(item) ? 1 : 0), 0)
 
 /** The simulation's slot: the act's last battle is the wolf, then strong villages, the first three easy, the rest hard. */
-function battleType(step: Step) {
+export function battleType(step: Step) {
   if (step.Wolf) return 'wolf'
   if (step.Strong) return 'strong'
   return (step.BattleIndex ?? 0) % BATTLES_PER_ACT < 3 ? 'easy' : 'hard'
@@ -80,7 +103,7 @@ function deckCounts(summary: Summary) {
 }
 
 /** The concept with the most of its cards in the final deck, starter copies not counted. */
-function conceptOf(summary: Summary, sim: Sim) {
+export function conceptOf(summary: Summary, sim: Sim) {
   const counts = deckCounts(summary)
   const scores = Object.entries(sim.data.pools).map(([name, pool]) => [
     name,
@@ -122,11 +145,7 @@ function groupBy<T>(items: T[], key: (item: T) => string) {
 }
 
 export function report(rows: Row[], sim: Sim | null, names: Names | null = null): Report {
-  const card = (id: string) => names?.cards[id] ?? id
-  const relic = (id: string) => names?.relics[id] ?? id
-  // An encounter key names its monsters by kind: PaperLantern*2, Curtain+Shutters, solo:TinKnight.
-  const encounter = (key: string) => key.replace(/[A-Z][A-Za-z]*/g, (kind) => names?.enemies[kind] ?? kind)
-  const concept = (id: string) => CONCEPT_NAMES[id] ?? id
+  const { card, relic, encounter, concept } = labeler(names)
   const summaries = rows.map((r) => r.summary)
   const finished = summaries.filter((s) => s.Result === WON || s.Result === LOST)
   const won = count(finished, (s) => s.Result === WON)
