@@ -1,3 +1,5 @@
+import { useState } from 'react'
+
 import { battleType, conceptOf, labeler, type Names, type Row, type Sim, type Step } from '@/playdata/stats'
 
 const RESULTS: Record<number, [string, string]> = {
@@ -14,13 +16,20 @@ const when = (utc?: string) => (utc ? new Date(utc).toLocaleString('ko-KR', { da
 /** Every run on its own, newest first: a one-line summary that opens to its battles, final deck and relics. */
 export function RunList({ rows, sim, names }: { rows: Row[]; sim: Sim | null; names: Names | null }) {
   const l = labeler(names)
-  const sorted = [...rows].sort((a, b) => (b.received_at ?? '').localeCompare(a.received_at ?? ''))
+  const [install, setInstall] = useState<string | null>(null)
+  const sorted = rows.filter((r) => !install || r.install_id === install).sort((a, b) => (b.received_at ?? '').localeCompare(a.received_at ?? ''))
   const choice = (c: Step['Card'], label: (id: string) => string) =>
     !c?.Offered?.length ? '' : !c.Chosen ? '고르지 않음' : c.Picked ? label(c.Picked) : '건너뜀'
 
   if (sorted.length === 0) return <p className="text-xs text-muted-foreground">데이터 없음</p>
   return (
     <div className="flex flex-col gap-2">
+      {install && (
+        <p className="flex items-center gap-2 text-xs text-muted-foreground">
+          설치 {install.slice(0, 8)}의 런만 보는 중 · {sorted.length}런
+          <button type="button" className="underline hover:text-heading" onClick={() => setInstall(null)}>모두 보기</button>
+        </p>
+      )}
       {sorted.map((r) => {
         const s = r.summary
         const [result, color] = RESULTS[s.Result ?? 0] ?? RESULTS[0]
@@ -35,7 +44,18 @@ export function RunList({ rows, sim, names }: { rows: Row[]; sim: Sim | null; na
               {sim && <span className="text-xs text-muted-foreground">{l.concept(conceptOf(s, sim))}</span>}
               {!!s.LostTo?.length && <span className="text-xs text-muted-foreground">{s.LostTo.map(l.enemy).join(', ')}에게 패배</span>}
               <span className="ml-auto text-xs text-muted-foreground tabular-nums">
-                {when(r.received_at)} · {r.version} · {r.install_id.slice(0, 8)}
+                {when(r.received_at)} · {r.version} ·{' '}
+                <button
+                  type="button"
+                  className="underline decoration-dotted hover:text-heading"
+                  title="이 설치의 런만 보기"
+                  onClick={(e) => {
+                    e.preventDefault()
+                    setInstall(install === r.install_id ? null : r.install_id)
+                  }}
+                >
+                  {r.install_id.slice(0, 8)}
+                </button>
               </span>
             </summary>
 
