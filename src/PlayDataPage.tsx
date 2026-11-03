@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { SignIn } from '@/components/SignIn'
 import { supabase } from '@/lib/supabase'
-import { compareVersions, report, suspectInstalls, type Row, type Sim, type Table } from '@/playdata/stats'
+import { compareVersions, report, suspectInstalls, type Names, type Row, type Sim, type Table } from '@/playdata/stats'
 
 const ALL = 'all'
 
@@ -28,6 +28,13 @@ async function loadSim() {
   const { data, error } = await supabase.from('sim_snapshots').select('label,created_at,data').order('id', { ascending: false }).limit(1)
   if (error) throw error
   return (data[0] as Sim | undefined) ?? null
+}
+
+// The newest card value snapshot's names; an older snapshot without them leaves the ids on screen.
+async function loadNames() {
+  const { data, error } = await supabase.from('card_values').select('names:data->names').order('id', { ascending: false }).limit(1)
+  if (error) throw error
+  return (data[0] as { names?: Names | null } | undefined)?.names ?? null
 }
 
 const isNumber = (cell: string) => /^-?[\d.]+$|^-$/.test(cell)
@@ -78,6 +85,7 @@ export default function PlayDataPage() {
   const [session, setSession] = useState<Session | null | undefined>(undefined)
   const [rows, setRows] = useState<Row[] | null>(null)
   const [sim, setSim] = useState<Sim | null>(null)
+  const [names, setNames] = useState<Names | null>(null)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [version, setVersion] = useState<string | null>(null)
@@ -88,7 +96,7 @@ export default function PlayDataPage() {
     supabase.auth.getSession().then(({ data }) => setSession(data.session))
     const { data } = supabase.auth.onAuthStateChange((_event, next) => setSession(next))
     if (import.meta.env.DEV)
-      Object.assign(window, { __playdata: (r: Row[], s: Sim | null) => { setSim(s); setRows(r) } })
+      Object.assign(window, { __playdata: (r: Row[], s: Sim | null, n: Names | null = null) => { setSim(s); setNames(n); setRows(r) } })
     return () => data.subscription.unsubscribe()
   }, [])
 
@@ -98,9 +106,10 @@ export default function PlayDataPage() {
     setLoading(true)
     setError('')
     try {
-      const [r, s] = await Promise.all([loadRuns(), loadSim()])
+      const [r, s, n] = await Promise.all([loadRuns(), loadSim(), loadNames()])
       setRows(r)
       setSim(s)
+      setNames(n)
     } catch (e) {
       setError(`불러오지 못했습니다: ${(e as { message?: string }).message ?? e}`)
     }
@@ -136,7 +145,7 @@ export default function PlayDataPage() {
       ),
     [shown, selected],
   )
-  const result = useMemo(() => report(filtered, sim), [filtered, sim])
+  const result = useMemo(() => report(filtered, sim, names), [filtered, sim, names])
 
   if (rows === null) {
     if (session === undefined) return null

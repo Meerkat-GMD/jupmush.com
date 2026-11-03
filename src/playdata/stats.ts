@@ -1,5 +1,5 @@
 // The tables of PaperVillage's tools/PlayData/analyze.py, computed in the browser from the runs table.
-// Keep the two in step: same filters, same battle types, same concept rule.
+// Keep the two in step: same filters, same battle types, same concept rule. Only the page shows Korean names.
 
 export type Choice = { Offered?: string[]; Chosen?: boolean; Picked?: string }
 export type Step = {
@@ -40,6 +40,9 @@ type SimPool = {
 }
 export type Sim = { label: string; created_at: string; data: { pools: Record<string, SimPool>; starter: Record<string, number> } }
 
+/** Korean names by id from the newest card_values row (PaperVillage's tools/CardValue), so this public code holds none. */
+export type Names = { cards: Record<string, string>; relics: Record<string, string>; enemies: Record<string, string> }
+
 export type Table = { title: string; note?: string; headers: string[]; rows: string[][] }
 export type Report = {
   runs: number
@@ -56,6 +59,7 @@ const LOST = 2
 const ABANDONED = 3 // RunResult: 0 InProgress, 1 Won, 2 Lost, 3 Abandoned
 const BATTLES_PER_ACT = 9
 const TYPES = ['easy', 'hard', 'strong', 'wolf']
+const CONCEPT_NAMES: Record<string, string> = { stone: '돌', recall: '회수', demolition: '철거', mixed: '혼합', none: '없음' }
 
 const pct = (part: number, whole: number) => (whole ? (100 * part) / whole : 0)
 const f1 = (x: number) => x.toFixed(1)
@@ -117,7 +121,12 @@ function groupBy<T>(items: T[], key: (item: T) => string) {
   return groups
 }
 
-export function report(rows: Row[], sim: Sim | null): Report {
+export function report(rows: Row[], sim: Sim | null, names: Names | null = null): Report {
+  const card = (id: string) => names?.cards[id] ?? id
+  const relic = (id: string) => names?.relics[id] ?? id
+  // An encounter key names its monsters by kind: PaperLantern*2, Curtain+Shutters, solo:TinKnight.
+  const encounter = (key: string) => key.replace(/[A-Z][A-Za-z]*/g, (kind) => names?.enemies[kind] ?? kind)
+  const concept = (id: string) => CONCEPT_NAMES[id] ?? id
   const summaries = rows.map((r) => r.summary)
   const finished = summaries.filter((s) => s.Result === WON || s.Result === LOST)
   const won = count(finished, (s) => s.Result === WON)
@@ -129,7 +138,7 @@ export function report(rows: Row[], sim: Sim | null): Report {
     tables.push({
       title: '시뮬레이션 승률',
       headers: ['pool', 'runs', 'win%'],
-      rows: pools.map(([name, p]) => [name, String(p.runs), f1(pct(p.wins, p.runs))]),
+      rows: pools.map(([name, p]) => [concept(name), String(p.runs), f1(pct(p.wins, p.runs))]),
     })
   }
 
@@ -145,7 +154,7 @@ export function report(rows: Row[], sim: Sim | null): Report {
   tables.push({
     title: '막별 사망',
     note: `패배 ${lostRuns.length}런 중 늑대전 사망 ${f1(pct(diedWolf, lostRuns.length))}%`,
-    headers: ['act', 'died', 'died% of runs', 'loss share%', ...pools.map(([n]) => `sim ${n} share%`)],
+    headers: ['act', 'died', 'died% of runs', 'loss share%', ...pools.map(([n]) => `sim ${concept(n)} share%`)],
     rows: [1, 2, 3].map((a) => [
       String(a),
       String(diedAct[a]),
@@ -197,11 +206,14 @@ export function report(rows: Row[], sim: Sim | null): Report {
   tables.push({
     title: '조우별 전투',
     headers: ['act', 'encounter', 'fought', 'died%', 'hp at start', 'hp lost', 'turns'],
-    rows: byKey.map(([key, items]) => [...key.split('\u0000'), ...battleCells(items)]),
+    rows: byKey.map(([key, items]) => {
+      const [act, encounterKey] = key.split('\u0000')
+      return [act, encounter(encounterKey), ...battleCells(items)]
+    }),
   })
 
   // Reward offers: only answered offers count; an empty pick is a skip.
-  for (const [kind, title] of [['Card', '카드 보상'], ['GiftCard', '선물 카드 보상'], ['Relic', '유물 보상']] as const) {
+  for (const [kind, title, label] of [['Card', '카드 보상', card], ['GiftCard', '선물 카드 보상', card], ['Relic', '유물 보상', relic]] as const) {
     const offered = new Map<string, number>()
     const picked = new Map<string, number>()
     let answered = 0
@@ -221,15 +233,15 @@ export function report(rows: Row[], sim: Sim | null): Report {
       headers: ['item', 'offered', 'picked', 'pick%'],
       rows: [...offered]
         .sort(([a, n], [b, m]) => rate(b) - rate(a) || m - n || a.localeCompare(b))
-        .map(([item, n]) => [item, String(n), String(picked.get(item) ?? 0), f1(rate(item))]),
+        .map(([item, n]) => [label(item), String(n), String(picked.get(item) ?? 0), f1(rate(item))]),
     })
   }
 
   // Final deck and relics against the result.
   const simAdopt = Object.assign({}, ...pools.map(([, p]) => p.adopt)) as SimPool['adopt']
-  for (const [title, ownedOf, withSim] of [
-    ['최종 덱 카드', (s: Summary) => new Set(deckCounts(s).keys()), true],
-    ['최종 유물', (s: Summary) => new Set(s.Relics ?? []), false],
+  for (const [title, ownedOf, withSim, label] of [
+    ['최종 덱 카드', (s: Summary) => new Set(deckCounts(s).keys()), true, card],
+    ['최종 유물', (s: Summary) => new Set(s.Relics ?? []), false, relic],
   ] as const) {
     const owners = new Map<string, [number, number]>()
     for (const s of finished)
@@ -246,7 +258,7 @@ export function report(rows: Row[], sim: Sim | null): Report {
         .sort(([a, [n]], [b, [m]]) => m - n || a.localeCompare(b))
         .map(([item, [n, w]]) => {
           const a = simAdopt[item]
-          return [item, String(n), String(w), f1(pct(n, finished.length)), f1(pct(w, n)),
+          return [label(item), String(n), String(w), f1(pct(n, finished.length)), f1(pct(w, n)),
             ...(showSim ? (a ? [f1(a.adopted), f1(a.win_owned)] : ['-', '-']) : [])]
         }),
     })
@@ -262,7 +274,7 @@ export function report(rows: Row[], sim: Sim | null): Report {
         const runs = byConcept.get(c) ?? []
         const w = count(runs, (s) => s.Result === WON)
         const p = sim.data.pools[c]
-        return [c, String(runs.length), String(w), f1(pct(w, runs.length)), p ? f1(pct(p.wins, p.runs)) : '-']
+        return [concept(c), String(runs.length), String(w), f1(pct(w, runs.length)), p ? f1(pct(p.wins, p.runs)) : '-']
       }),
     })
   }
